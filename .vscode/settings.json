@@ -1,0 +1,5 @@
+{
+    "continue.enableConsole": true,
+    "continue.session": {"id": "qwen2.5-coder"
+    }
+}
