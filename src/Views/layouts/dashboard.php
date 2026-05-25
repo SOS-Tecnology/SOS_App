@@ -35,13 +35,7 @@
         .sb-chevron { transition: transform 0.25s; flex-shrink: 0; }
         #sidebar.collapsed .sb-chevron { display: none; }
 
-        .sb-sub { overflow: hidden; max-height: 0; transition: max-height 0.3s ease; }
-        .sb-sub.open { max-height: 500px; }
-        #sidebar.collapsed .sb-sub { max-height: 0 !important; }
-
         .sb-item.active, .sb-item:hover { background: rgba(255,255,255,0.08); }
-        .sb-subitem:hover { background: rgba(255,255,255,0.06); }
-        .sb-subitem.active { background: rgba(255,255,255,0.10); }
 
         .sb-tooltip {
             display: none;
@@ -105,7 +99,7 @@
                             d="M4 6h16M4 12h16M4 18h16"/>
                     </svg>
                 </button>
-                <a href="/dashboard_home" class="flex items-center gap-2">
+                <a href="/sistemas" class="flex items-center gap-2">
                     <div class="w-8 h-8 bg-teal-600 rounded flex items-center justify-center
                                 font-bold text-sm hover:bg-teal-700 transition text-white">
                         SN
@@ -119,7 +113,7 @@
 
             <?php if (isset($_SESSION['user'])): ?>
             <div class="flex items-center gap-3 relative">
-                <a href="/dashboard_home" title="Inicio" class="text-gray-400 hover:text-white transition">
+                <a href="/sistemas" title="Inicio" class="text-gray-400 hover:text-white transition">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                             d="M3 9.75L12 4l9 5.75V20a1 1 0 01-1 1h-5v-6H9v6H4a1 1 0 01-1-1V9.75z"/>
@@ -137,6 +131,10 @@
                     <a href="/usuarios/create"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
                         Crear usuario
+                    </a>
+                    <a href="/permisos"
+                        class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                        Gestionar permisos
                     </a>
                     <a href="/perfiles"
                         class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
@@ -163,8 +161,9 @@
                 $currentPath = parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH);
 
                 function sbItem(string $href, string $label, string $svgPath, string $current): void {
-                    $active = (str_starts_with($current, $href) && $href !== '/dashboard_home')
-                              || $current === $href ? 'active' : '';
+                    $active = ($href === '/sistemas')
+                        ? ($current === '/sistemas' ? 'active' : '')
+                        : (str_starts_with($current, $href) ? 'active' : '');
                     echo <<<HTML
                     <a href="{$href}" class="sb-item {$active} flex items-center gap-3 px-4 py-2.5 text-gray-300 hover:text-white cursor-pointer text-sm">
                         <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -175,124 +174,55 @@
                     </a>
                     HTML;
                 }
-
-                $archivosItems = [
-                    ['tipos-documento',        'Tipos de Documento'],
-                    ['periodos-liquidacion',    'Período de Liquidación'],
-                    ['tipos-trabajador-pila',   'Tipos Trabajador PILA'],
-                    ['subtipos-trabajador',     'Sub Tipo Trabajador'],
-                    ['tipos-contrato',          'Tipo de Contrato'],
-                    ['tipos-incapacidad',       'Tipo de Incapacidad'],
-                    ['tabla-riesgos',           'Tabla Riesgos Prof.'],
-                    ['fondos-solidaridad',      'Fondo de Solidaridad P.'],
-                    ['eps',                     'Empresas Prestadoras EPS'],
-                    ['fondos-cesantias',        'Fondos de Cesantías'],
-                    ['entidades-riesgos',       'Entidades de Riesgos Prof.'],
-                    ['cajas-compensacion',      'Cajas de Compensa. Fam.'],
-                ];
-                $enArchivos = str_starts_with($currentPath, '/archivos');
                 ?>
 
-                <!-- Panel -->
+                <!-- Inicio -->
                 <?php sbItem(
-                    '/dashboard_home', 'Panel',
+                    '/sistemas', 'Inicio',
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
                         d="M3 3h7v7H3zm11 0h7v7h-7zM3 14h7v7H3zm11 0h7v7h-7z"/>',
                     $currentPath
                 ); ?>
 
-                <!-- Empleados -->
-                <?php sbItem(
-                    '/empleados', 'Empleados',
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>',
-                    $currentPath
-                ); ?>
-
-                <!-- Novedades -->
-                <?php sbItem(
-                    '/novedades', 'Novedades',
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5
-                           m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>',
-                    $currentPath
-                ); ?>
-
-                <!-- Informes -->
-                <?php sbItem(
-                    '/informes', 'Informes',
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9
-                           a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0
-                           012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
-                    $currentPath
-                ); ?>
-
-                <!-- Nómina Electrónica -->
-                <?php sbItem(
-                    '/nomina-electronica', 'Nómina Electrónica',
-                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586
-                           a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/>',
-                    $currentPath
-                ); ?>
-
                 <div class="border-t border-gray-700 mx-4 my-2"></div>
 
-                <!-- Archivos (con submenú) -->
-                <div class="sb-item <?= $enArchivos ? 'active' : '' ?> flex items-center gap-3 px-4 py-2.5 text-gray-300
-                     hover:text-white cursor-pointer text-sm select-none"
-                     onclick="toggleArchivos(this)">
-                    <svg class="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M5 19a2 2 0 01-2-2V7a2 2 0 012-2h4l2 2h4a2 2 0 012 2v1
-                               M5 19h14a2 2 0 002-2v-5a2 2 0 00-2-2H9a2 2 0 00-2 2v5a2 2 0 01-2 2z"/>
-                    </svg>
-                    <span class="sb-label flex-1">Archivos</span>
-                    <svg class="sb-chevron w-4 h-4 <?= $enArchivos ? 'rotate-90' : '' ?>"
-                         fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                    </svg>
-                    <span class="sb-tooltip">Archivos</span>
-                </div>
-                <div class="sb-sub <?= $enArchivos ? 'open' : '' ?>" id="sb-archivos">
-                    <?php foreach ($archivosItems as [$slug, $label]):
-                        $href   = '/archivos/' . $slug;
-                        $active = $currentPath === $href ? 'active' : '';
-                    ?>
-                    <a href="<?= $href ?>"
-                       class="sb-subitem <?= $active ?> flex items-center gap-2 pl-12 pr-4 py-2 text-gray-400 hover:text-white text-xs">
-                        <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
-                        </svg>
-                        <?= htmlspecialchars($label) ?>
-                    </a>
-                    <?php endforeach; ?>
-                </div>
-
-                <div class="border-t border-gray-700 mx-4 my-2"></div>
-
-                <!-- Usuarios -->
+                <!-- Nómina -->
                 <?php sbItem(
-                    '/usuarios', 'Usuarios',
+                    '/sistemas/nomina', 'Nómina',
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87
-                           M12 12a4 4 0 100-8 4 4 0 000 8z"/>',
+                        d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>',
                     $currentPath
                 ); ?>
 
-                <!-- Perfiles -->
+                <!-- Comercial -->
                 <?php sbItem(
-                    '/perfiles', 'Perfiles',
+                    '/sistemas/comercial', 'Comercial',
                     '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                        d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066
-                           c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35
-                           a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065
-                           c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37
-                           a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573
-                           c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
-                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>',
+                        d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/>',
+                    $currentPath
+                ); ?>
+
+                <!-- Contable -->
+                <?php sbItem(
+                    '/sistemas/contable', 'Contable',
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>',
+                    $currentPath
+                ); ?>
+
+                <!-- Administrativo -->
+                <?php sbItem(
+                    '/sistemas/administrativo', 'Administrativo',
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/>',
+                    $currentPath
+                ); ?>
+
+                <!-- Archivos Generales -->
+                <?php sbItem(
+                    '/sistemas/archivos', 'Archivos Generales',
+                    '<path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8"
+                        d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"/>',
                     $currentPath
                 ); ?>
 
@@ -327,14 +257,6 @@
                 localStorage.setItem('snSidebarCollapsed', sidebar.classList.contains('collapsed') ? '1' : '0');
             }
         });
-
-        function toggleArchivos(el) {
-            if (sidebar.classList.contains('collapsed')) return;
-            const sub     = document.getElementById('sb-archivos');
-            const chevron = el.querySelector('.sb-chevron');
-            sub.classList.toggle('open');
-            chevron.classList.toggle('rotate-90');
-        }
 
         function toggleUserMenu() {
             document.getElementById('userMenu').classList.toggle('hidden');

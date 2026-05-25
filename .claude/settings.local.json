@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f d:/Desarrollo_web/SOS_Nomina/src/Controllers/EmpleadosController.php d:/Desarrollo_web/SOS_Nomina/src/Controllers/InformesController.php d:/Desarrollo_web/SOS_Nomina/src/Controllers/NominaElectronicaController.php d:/Desarrollo_web/SOS_Nomina/src/Controllers/NovedadesController.php)",
+      "Bash(rm -rf d:/Desarrollo_web/SOS_Nomina/src/Views/Empleados d:/Desarrollo_web/SOS_Nomina/src/Views/Informes d:/Desarrollo_web/SOS_Nomina/src/Views/NominaElectronica d:/Desarrollo_web/SOS_Nomina/src/Views/Novedades d:/Desarrollo_web/SOS_Nomina/src/Views/Archivos)",
+      "Bash(rm -f d:/Desarrollo_web/SOS_Nomina/src/Views/dashboard_home.php)"
+    ]
+  }
+}

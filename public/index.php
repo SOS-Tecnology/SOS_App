@@ -16,12 +16,10 @@ use Slim\Factory\AppFactory;
 use Medoo\Medoo;
 use Dotenv\Dotenv;
 use App\Middleware\AuthMiddleware;
-use App\Controllers\ArchivosController;
-use App\Controllers\EmpleadosController;
-use App\Controllers\NovedadesController;
-use App\Controllers\InformesController;
-use App\Controllers\NominaElectronicaController;
 use App\Controllers\PerfilesController;
+use App\Controllers\PermisosController;
+use App\Controllers\SistemasController;
+use App\Services\PermisosService;
 
 // ── Entorno ───────────────────────────────────────────────────────
 $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
@@ -55,12 +53,22 @@ function renderView($response, $viewPath, $title, $data = [])
     return $response;
 }
 
+// ── Helper de Permisos ────────────────────────────────────────────
+function permisos(): PermisosService
+{
+    static $permisos = null;
+    if ($permisos === null) {
+        $permisos = new PermisosService($GLOBALS['db']);
+    }
+    return $permisos;
+}
+
 // ─────────────────────────────────────────────────────────────────
 // RUTAS PÚBLICAS
 // ─────────────────────────────────────────────────────────────────
 
 $app->get('/', function ($request, $response) {
-    $loc = isset($_SESSION['user']) ? '/dashboard_home' : '/login';
+    $loc = isset($_SESSION['user']) ? '/sistemas' : '/login';
     return $response->withHeader('Location', $loc)->withStatus(302);
 });
 
@@ -98,7 +106,7 @@ $app->post('/login', function ($request, $response) {
     ];
     $_SESSION['LAST_ACTIVITY'] = time();
 
-    return $response->withHeader('Location', '/dashboard_home')->withStatus(302);
+    return $response->withHeader('Location', '/sistemas')->withStatus(302);
 });
 
 $app->get('/logout', function ($request, $response) {
@@ -196,79 +204,15 @@ $authMiddleware = new AuthMiddleware();
 
 $app->group('', function ($group) {
 
-    // ── Dashboard ─────────────────────────────────────────────────
-    $group->get('/dashboard_home', function ($request, $response) {
-        return renderView($response, __DIR__ . '/../src/Views/dashboard_home.php', 'Inicio', []);
+    // ── Sistemas (inicio) ─────────────────────────────────────────
+    $group->get('/sistemas', function ($request, $response) {
+        $ctrl = new SistemasController($GLOBALS['db']);
+        return $ctrl->principal($request, $response);
     });
 
-    // ── Empleados ─────────────────────────────────────────────────
-    $group->get('/empleados', function ($request, $response) {
-        $ctrl = new EmpleadosController($GLOBALS['db']);
-        return $ctrl->index($request, $response);
-    });
-
-    // ── Novedades ─────────────────────────────────────────────────
-    $group->get('/novedades', function ($request, $response) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->index($request, $response);
-    });
-
-    $group->get('/novedades/create', function ($request, $response) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->create($request, $response);
-    });
-
-    $group->post('/novedades/store', function ($request, $response) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->store($request, $response);
-    });
-
-    $group->get('/novedades/{id}/edit', function ($request, $response, $args) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->edit($request, $response, $args);
-    });
-
-    $group->post('/novedades/{id}/update', function ($request, $response, $args) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->update($request, $response, $args);
-    });
-
-    $group->get('/novedades/{id}', function ($request, $response, $args) {
-        $ctrl = new NovedadesController($GLOBALS['db']);
-        return $ctrl->show($request, $response, $args);
-    });
-
-    // ── Informes ──────────────────────────────────────────────────
-    $group->get('/informes', function ($request, $response) {
-        $ctrl = new InformesController($GLOBALS['db']);
-        return $ctrl->index($request, $response);
-    });
-
-    // ── Nómina Electrónica ────────────────────────────────────────
-    $group->get('/nomina-electronica', function ($request, $response) {
-        $ctrl = new NominaElectronicaController($GLOBALS['db']);
-        return $ctrl->index($request, $response);
-    });
-
-    // ── Archivos (catálogos) ──────────────────────────────────────
-    $group->get('/archivos/{catalogo}', function ($request, $response, $args) {
-        $ctrl = new ArchivosController($GLOBALS['db']);
-        return $ctrl->index($request, $response, $args);
-    });
-
-    $group->post('/archivos/{catalogo}/store', function ($request, $response, $args) {
-        $ctrl = new ArchivosController($GLOBALS['db']);
-        return $ctrl->store($request, $response, $args);
-    });
-
-    $group->post('/archivos/{catalogo}/{id}/update', function ($request, $response, $args) {
-        $ctrl = new ArchivosController($GLOBALS['db']);
-        return $ctrl->update($request, $response, $args);
-    });
-
-    $group->post('/archivos/{catalogo}/{id}/delete', function ($request, $response, $args) {
-        $ctrl = new ArchivosController($GLOBALS['db']);
-        return $ctrl->delete($request, $response, $args);
+    $group->get('/sistemas/{slug}', function ($request, $response, $args) {
+        $ctrl = new SistemasController($GLOBALS['db']);
+        return $ctrl->dashboard($request, $response, $args);
     });
 
     // ── Perfiles ──────────────────────────────────────────────────
@@ -300,6 +244,22 @@ $app->group('', function ($group) {
     $group->post('/perfiles/{id}/delete', function ($request, $response, $args) {
         $ctrl = new PerfilesController($GLOBALS['db']);
         return $ctrl->delete($request, $response, $args);
+    });
+
+    // ── Permisos ──────────────────────────────────────────────────
+    $group->get('/permisos', function ($request, $response) {
+        $ctrl = new PermisosController($GLOBALS['db']);
+        return $ctrl->index($request, $response);
+    });
+
+    $group->get('/permisos/{id}/edit', function ($request, $response, $args) {
+        $ctrl = new PermisosController($GLOBALS['db']);
+        return $ctrl->edit($request, $response, $args);
+    });
+
+    $group->post('/permisos/{id}/update', function ($request, $response, $args) {
+        $ctrl = new PermisosController($GLOBALS['db']);
+        return $ctrl->update($request, $response, $args);
     });
 
     // ── Usuarios ──────────────────────────────────────────────────

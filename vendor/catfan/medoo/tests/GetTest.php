@@ -54,7 +54,6 @@ class GetTest extends MedooTestCase
                 SELECT "email","location"
                 FROM "account"
                 WHERE "user_id" = 1234
-                LIMIT 1
                 EOD,
             'mssql' => <<<EOD
                 SELECT [email],[location]
