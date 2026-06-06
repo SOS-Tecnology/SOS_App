@@ -5,12 +5,23 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= $title ?? 'SOS-Nómina' ?></title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <link href="/css/app.css" rel="stylesheet">
     <link href="/css/dashboard.css" rel="stylesheet">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 
     <style>
         button, a, [role="button"], input, select, textarea { touch-action: manipulation; }
+
+        /* ── Select2 + Tailwind ──────────────────────────────────── */
+        .select2-container--default .select2-selection--single {
+            border-color: #D1D5DB; height: 38px; padding: 5px; border-radius: 0.375rem;
+        }
+        .select2-container--default .select2-selection--single .select2-selection__arrow {
+            height: 36px;
+        }
+        .select2-container { width: 100% !important; }
 
         /* ── SIDEBAR ─────────────────────────────────────────────── */
         #sidebar {

@@ -14,13 +14,28 @@ if (!isset($_SESSION['user'])) { header('Location: /login'); exit; }
     <?php if (!empty($opciones)): ?>
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <?php foreach ($opciones as $opcion): ?>
-                <div class="bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-teal-500 p-5 min-h-32 flex flex-col justify-between">
-                    <div>
-                        <h3 class="text-base font-bold text-gray-800"><?= htmlspecialchars($opcion['nombre']) ?></h3>
-                        <p class="text-gray-600 text-sm mt-1"><?= htmlspecialchars($opcion['descripcion'] ?? '') ?></p>
+                <?php
+                    $url   = $opcion['url'] ?? null;
+                    $color = $opcion['color'] ?? 'teal';
+                ?>
+                <?php if ($url): ?>
+                    <a href="<?= htmlspecialchars($url) ?>"
+                       class="bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-<?= $color ?>-500 p-5 min-h-32 flex flex-col justify-between group">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800 group-hover:text-<?= $color ?>-600"><?= htmlspecialchars($opcion['nombre']) ?></h3>
+                            <p class="text-gray-600 text-sm mt-1"><?= htmlspecialchars($opcion['descripcion'] ?? '') ?></p>
+                        </div>
+                        <span class="text-xs font-semibold text-<?= $color ?>-600 mt-3">Ingresar →</span>
+                    </a>
+                <?php else: ?>
+                    <div class="bg-white rounded-lg shadow hover:shadow-lg transition border-l-4 border-teal-500 p-5 min-h-32 flex flex-col justify-between">
+                        <div>
+                            <h3 class="text-base font-bold text-gray-800"><?= htmlspecialchars($opcion['nombre']) ?></h3>
+                            <p class="text-gray-600 text-sm mt-1"><?= htmlspecialchars($opcion['descripcion'] ?? '') ?></p>
+                        </div>
+                        <span class="text-xs text-gray-400 mt-3">Próximamente</span>
                     </div>
-                    <span class="text-xs text-gray-400 mt-3">Próximamente</span>
-                </div>
+                <?php endif; ?>
             <?php endforeach; ?>
         </div>
     <?php else: ?>

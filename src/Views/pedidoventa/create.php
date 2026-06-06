@@ -1,9 +1,9 @@
-<?php $title = "Nueva Orden de Pedido OP"; ?>
+<?php $title = "Nuevo Pedido de Venta"; ?>
 
-<form action="/orden-pedido/store" method="POST" id="orderForm" class="max-w-6xl mx-auto my-8">
+<form action="/pedido-venta/store" method="POST" id="orderForm" class="max-w-6xl mx-auto my-8">
 
     <div class="max-w-6xl mx-auto mb-4 flex items-center justify-between">
-        <a href="/orden-pedido" class="flex items-center text-sm font-bold text-gray-400 hover:text-blue-600 transition-colors">
+        <a href="/pedido-venta" class="flex items-center text-sm font-bold text-gray-400 hover:text-blue-600 transition-colors">
             <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
@@ -16,7 +16,7 @@
         <div class="bg-gray-50 border-b p-6">
             <div class="flex justify-between items-start mb-6">
                 <div>
-                    <span class="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase">Orden de Pedido</span>
+                    <span class="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase">Pedido de Venta</span>
                     <h1 class="text-3xl font-black text-gray-800 mt-2">OP # <span class="text-gray-400">NUEVO</span></h1>
                 </div>
             </div>
@@ -33,7 +33,7 @@
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Sucursal</label>
-                    <select name="codsuc" id="codsuc" class="w-full border-gray-300 rounded-lg text-sm">
+                    <select name="codsuc" id="codsuc" class="select2-suc w-full">
                         <option value="">Seleccione cliente...</option>
                     </select>
                 </div>
@@ -87,24 +87,23 @@
     </div>
 
     <div class="mt-8 flex justify-end gap-4">
-        <button type="submit" class="bg-green-600 text-white px-10 py-3 rounded-xl font-black shadow-lg hover:bg-green-700 transition-all">GUARDAR ORDEN</button>
+        <button type="submit" class="bg-green-600 text-white px-10 py-3 rounded-xl font-black shadow-lg hover:bg-green-700 transition-all">GUARDAR PEDIDO</button>
     </div>
 </form>
 <script>
     $(document).ready(function() {
         $('.select2-cliente').select2();
+        $('#codsuc').select2();
 
         // SUCURSALES: Conexión reforzada
         $('#codcli').on('change', function() {
             const codcli = $(this).val();
             const $sucSelect = $('#codsuc');
 
-            $sucSelect.html('<option value="">Cargando sucursales...</option>');
-
             if (!codcli) return;
 
             $.ajax({
-                url: '/orden-pedido/sucursales/' + codcli,
+                url: '/pedido-venta/sucursales/' + codcli,
                 type: 'GET',
                 success: function(response) {
                     let options = '';
@@ -118,10 +117,10 @@
                     } else {
                         options = '<option value="01">01 - SEDE PRINCIPAL</option>';
                     }
-                    $sucSelect.html(options);
+                    $sucSelect.html(options).trigger('change.select2');
                 },
                 error: function() {
-                    $sucSelect.html('<option value="01">01 - SEDE PRINCIPAL</option>');
+                    $sucSelect.html('<option value="01">01 - SEDE PRINCIPAL</option>').trigger('change.select2');
                 }
             });
         });
@@ -139,12 +138,12 @@
                 </select>
             </td>
             <td class="p-3">
-                <select name="items[${rowIdx}][codtalla]" class="w-full border-gray-300 rounded text-xs">
+                <select name="items[${rowIdx}][codtalla]" class="select2-item w-full">
                     <?php foreach ($tallas as $t): ?> <option value="<?= $t ?>"><?= $t ?></option> <?php endforeach; ?>
                 </select>
             </td>
             <td class="p-3">
-                <select name="items[${rowIdx}][codcolor]" class="w-full border-gray-300 rounded text-xs">
+                <select name="items[${rowIdx}][codcolor]" class="select2-item w-full">
                     <?php foreach ($colores as $c): ?> <option value="<?= $c ?>"><?= $c ?></option> <?php endforeach; ?>
                 </select>
             </td>
@@ -163,15 +162,16 @@
         </tr>
         <tr class="comment-row bg-gray-50/50" data-index="${rowIdx}">
             <td colspan="6" class="px-3 pb-3 pt-1 border-b border-gray-200">
-                <input type="text" name="items[${rowIdx}][comencpo]" placeholder="Escriba aquí observaciones específicas para este producto..." 
+                <input type="text" name="items[${rowIdx}][comencpo]" placeholder="Escriba aquí observaciones específicas para este producto..."
                        class="w-full bg-transparent border-b border-dashed border-gray-300 text-[11px] text-blue-500 focus:ring-0 italic p-1">
             </td>
         </tr>`;
 
             $('#itemsTable tbody').append(row);
 
-            // Inicializar select2 en el nuevo elemento
+            // Inicializar select2 en los selects de la nueva fila
             $(`tr[data-index="${rowIdx}"] .product-select`).select2();
+            $(`tr[data-index="${rowIdx}"] .select2-item`).select2();
 
             rowIdx++;
             updateTotals();
@@ -221,7 +221,5 @@
             $(`tr[data-index="${idx}"]`).remove();
             updateTotals();
         });
-
-        // El resto de funciones de cálculo (updateTotals) permanecen igual
     });
 </script>

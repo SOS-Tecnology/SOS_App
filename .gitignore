@@ -1,0 +1,5 @@
+composer.lock
+composer.phar
+.env.example
+/vendor/
+/Documentación

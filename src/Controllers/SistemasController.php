@@ -31,7 +31,7 @@ class SistemasController
             'comercial' => [
                 ['slug' => 'clientes',     'nombre' => 'Clientes',     'descripcion' => 'Gestión de clientes.'],
                 ['slug' => 'cotizaciones', 'nombre' => 'Cotizaciones', 'descripcion' => 'Cotizaciones a clientes.'],
-                ['slug' => 'pedidos',      'nombre' => 'Pedidos',      'descripcion' => 'Pedidos comerciales.'],
+                ['slug' => 'pedidos',      'nombre' => 'Pedidos de Venta', 'descripcion' => 'Toma y control de pedidos de venta.', 'url' => '/pedido-venta', 'color' => 'blue'],
                 ['slug' => 'facturacion',  'nombre' => 'Facturación',  'descripcion' => 'Facturación a clientes.'],
                 ['slug' => 'reportes',     'nombre' => 'Reportes',     'descripcion' => 'Reportes comerciales.'],
             ],

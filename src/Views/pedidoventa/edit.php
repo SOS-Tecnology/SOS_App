@@ -1,14 +1,14 @@
-<?php $title = "Editar OP # " . $p['documento']; ?>
+<?php $title = "Editar Pedido de Venta # " . $p['documento']; ?>
 
 <div class="max-w-7xl mx-auto my-4 px-4">
     <div class="flex items-center justify-between mb-3">
-        <a href="/orden-pedido" class="flex items-center text-xs font-bold text-blue-600 hover:underline">
+        <a href="/pedido-venta" class="flex items-center text-xs font-bold text-blue-600 hover:underline">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" /></svg>
             VOLVER AL LISTADO
         </a>
     </div>
 
-    <form action="/orden-pedido/update/<?= $p['documento'] ?>" method="POST" id="orderForm">
+    <form action="/pedido-venta/update/<?= $p['documento'] ?>" method="POST" id="orderForm">
         <input type="hidden" name="codcp" value="<?= $p['codcp'] ?>">
 
         <div class="bg-white rounded-lg shadow-xl border border-gray-200 overflow-hidden">
@@ -38,7 +38,7 @@
                     </div>
 
                     <div class="md:col-span-1">
-                        <label class="block text-[9px] font-bold text-blue-300 uppercase italic">Fecha OP</label>
+                        <label class="block text-[9px] font-bold text-blue-300 uppercase italic">Fecha Pedido</label>
                         <input type="date" name="fecha" value="<?= $p['fecha'] ?>" class="w-full bg-gray-700 border-none rounded text-xs p-1 text-white">
                     </div>
                     <div>
@@ -147,6 +147,7 @@
 <script>
 $(document).ready(function() {
     $('.product-select').select2();
+    $('select[name$="[codtalla]"], select[name$="[codcolor]"]').select2();
     let rowIdx = <?= count($detalles) ?>;
 
     // --- LÓGICA DE SUCURSAL PARA EDICIÓN ---
@@ -158,7 +159,7 @@ $(document).ready(function() {
         if (!codcli) return;
 
         $.ajax({
-            url: '/orden-pedido/sucursales/' + codcli,
+            url: '/pedido-venta/sucursales/' + codcli,
             type: 'GET',
             success: function(response) {
                 let options = '';
@@ -217,6 +218,7 @@ $(document).ready(function() {
         </tr>`;
         $('#itemsTable tbody').append(row);
         $(`tr[data-index="${rowIdx}"] .product-select`).select2();
+        $(`tr[data-index="${rowIdx}"] select[name$="[codtalla]"], tr[data-index="${rowIdx}"] select[name$="[codcolor]"]`).select2();
         rowIdx++;
         updateTotals();
     });

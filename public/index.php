@@ -19,7 +19,7 @@ use App\Middleware\AuthMiddleware;
 use App\Controllers\PerfilesController;
 use App\Controllers\PermisosController;
 use App\Controllers\SistemasController;
-use App\Controllers\OrdenPedidoController;
+use App\Controllers\PedidoVentaController;
 use App\Services\PermisosService;
 
 // ── Entorno ───────────────────────────────────────────────────────
@@ -206,46 +206,46 @@ $authMiddleware = new AuthMiddleware();
 $app->group('', function ($group) {
 
     // ─────────────────────────────────────────────────────────────
-    // ORDENES DE PEDIDO
+    // PEDIDOS DE VENTA
     // ─────────────────────────────────────────────────────────────
 
-    $group->get('/orden-pedido', function ($request, $response) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta', function ($request, $response) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->index($request, $response);
     });
 
-    $group->get('/orden-pedido/create', function ($request, $response) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta/create', function ($request, $response) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->create($request, $response);
     });
 
-    $group->post('/orden-pedido/store', function ($request, $response) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->post('/pedido-venta/store', function ($request, $response) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->store($request, $response);
     });
 
-    $group->get('/orden-pedido/show/{id}', function ($request, $response, $args) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta/show/{id}', function ($request, $response, $args) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->show($request, $response, $args);
     });
 
-    $group->get('/orden-pedido/edit/{id}', function ($request, $response, $args) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta/edit/{id}', function ($request, $response, $args) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->edit($request, $response, $args);
     });
 
-    $group->post('/orden-pedido/update/{id}', function ($request, $response, $args) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->post('/pedido-venta/update/{id}', function ($request, $response, $args) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->update($request, $response, $args);
     });
 
-    $group->get('/orden-pedido/sucursales/{codcli}', function ($request, $response, $args) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta/sucursales/{codcli}', function ($request, $response, $args) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->getSucursales($request, $response, $args);
     });
 
-    $group->get('/orden-pedido/pdf/{id}', function ($request, $response, $args) {
-        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+    $group->get('/pedido-venta/pdf/{id}', function ($request, $response, $args) {
+        $ctrl = new PedidoVentaController($GLOBALS['db']);
         return $ctrl->generarPdf($request, $response, $args);
     });
 
