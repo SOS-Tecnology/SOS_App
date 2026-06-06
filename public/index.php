@@ -19,6 +19,7 @@ use App\Middleware\AuthMiddleware;
 use App\Controllers\PerfilesController;
 use App\Controllers\PermisosController;
 use App\Controllers\SistemasController;
+use App\Controllers\OrdenPedidoController;
 use App\Services\PermisosService;
 
 // ── Entorno ───────────────────────────────────────────────────────
@@ -203,6 +204,52 @@ $app->post('/reset-password/{token}', function ($request, $response, $args) {
 $authMiddleware = new AuthMiddleware();
 
 $app->group('', function ($group) {
+
+    // ─────────────────────────────────────────────────────────────
+    // ORDENES DE PEDIDO
+    // ─────────────────────────────────────────────────────────────
+
+    $group->get('/orden-pedido', function ($request, $response) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->index($request, $response);
+    });
+
+    $group->get('/orden-pedido/create', function ($request, $response) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->create($request, $response);
+    });
+
+    $group->post('/orden-pedido/store', function ($request, $response) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->store($request, $response);
+    });
+
+    $group->get('/orden-pedido/show/{id}', function ($request, $response, $args) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->show($request, $response, $args);
+    });
+
+    $group->get('/orden-pedido/edit/{id}', function ($request, $response, $args) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->edit($request, $response, $args);
+    });
+
+    $group->post('/orden-pedido/update/{id}', function ($request, $response, $args) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->update($request, $response, $args);
+    });
+
+    $group->get('/orden-pedido/sucursales/{codcli}', function ($request, $response, $args) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->getSucursales($request, $response, $args);
+    });
+
+    $group->get('/orden-pedido/pdf/{id}', function ($request, $response, $args) {
+        $ctrl = new OrdenPedidoController($GLOBALS['db']);
+        return $ctrl->generarPdf($request, $response, $args);
+    });
+
+
 
     // ── Sistemas (inicio) ─────────────────────────────────────────
     $group->get('/sistemas', function ($request, $response) {
