@@ -1,6 +1,6 @@
 {
-    "name": "sos/nomina",
-    "description": "SOS-Nomina - Sistema de Gestión de Nómina",
+    "name": "sos/SOS_App",
+    "description": "SOS_App - Sistema de Gestión de Administrativo",
     "type": "project",
     "require": {
         "php": ">=8.1",
