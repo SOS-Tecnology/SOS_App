@@ -13,8 +13,8 @@ require __DIR__ . '/../vendor/autoload.php';
 require_once __DIR__ . '/../src/config.php';
 
 use Slim\Factory\AppFactory;
-use Medoo\Medoo;
 use Dotenv\Dotenv;
+use App\Lib\Database;
 use App\Middleware\AuthMiddleware;
 use App\Controllers\PerfilesController;
 use App\Controllers\PermisosController;
@@ -27,15 +27,13 @@ $dotenv = Dotenv::createImmutable(__DIR__ . '/..');
 $dotenv->load();
 
 // ── Base de datos ─────────────────────────────────────────────────
-$GLOBALS['db'] = new Medoo([
-    'database_type' => $_ENV['DB_TYPE'],
-    'database_name' => $_ENV['DB_NAME'],
-    'server'        => $_ENV['DB_HOST'],
-    'username'      => $_ENV['DB_USER'],
-    'password'      => $_ENV['DB_PASS'],
-    'charset'       => 'utf8mb4',
-    'collation'     => 'utf8mb4_unicode_ci',
-]);
+try {
+    $GLOBALS['db'] = Database::connect();
+} catch (\RuntimeException $e) {
+    $_SESSION['db_error'] = true;
+    header('Location: /login');
+    exit;
+}
 
 $app = AppFactory::create();
 $app->addErrorMiddleware(true, true, true);

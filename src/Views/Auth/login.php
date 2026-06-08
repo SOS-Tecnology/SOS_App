@@ -1,16 +1,34 @@
 <?php
-$errors = $_SESSION['errors'] ?? [];
-unset($_SESSION['errors']);
+$errors  = $_SESSION['errors']  ?? [];
+$dbError = $_SESSION['db_error'] ?? false;
+unset($_SESSION['errors'], $_SESSION['db_error']);
 ?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>SOS-Nómina | Iniciar sesión</title>
+    <title>SOS_App | Iniciar sesión</title>
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="min-h-screen flex items-center justify-center
              bg-gradient-to-br from-slate-900 via-teal-950 to-teal-900">
+
+    <?php if ($dbError): ?>
+    <div class="fixed top-0 left-0 w-full z-50 flex items-center gap-3
+                bg-red-700 border-b-4 border-red-900 px-6 py-4 shadow-xl">
+        <svg class="w-7 h-7 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round"
+                  d="M12 9v2m0 4h.01M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        </svg>
+        <div>
+            <p class="text-white font-bold text-sm">No se pudo conectar a la base de datos</p>
+            <p class="text-red-200 text-xs mt-0.5">
+                Verifique que el servidor de base de datos esté disponible y que las credenciales en
+                <code class="bg-red-900/50 px-1 rounded">.env</code> sean correctas.
+            </p>
+        </div>
+    </div>
+    <?php endif; ?>
 
     <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-2xl w-full max-w-md overflow-hidden
                 border border-white/20">
@@ -21,8 +39,8 @@ unset($_SESSION['errors']);
                         mx-auto mb-3 text-white font-bold text-lg shadow-lg border border-white/25">
                 SN
             </div>
-            <h1 class="text-xl font-bold text-white tracking-wide">SOS-Nómina</h1>
-            <p class="text-teal-200 text-sm mt-0.5 font-light">Sistema de Gestión de Nómina</p>
+            <h1 class="text-xl font-bold text-white tracking-wide">SOS_App</h1>
+            <p class="text-teal-200 text-sm mt-0.5 font-light">Sistema de Gestión Empresarial</p>
         </div>
 
         <div class="px-8 py-7">

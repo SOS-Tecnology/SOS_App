@@ -1,26 +1,26 @@
-<?php $title = "Consulta Orden de Pedido OP # " . $pedido['documento']; ?>
+<?php $title = "Consulta de Pedido de Venta PV # " . $pedido['documento']; ?>
 
 <div class="max-w-7xl mx-auto my-4 px-4">
     <div class="flex items-center justify-between mb-3">
-        <a href="/orden-pedido" class="flex items-center text-xs font-bold text-blue-600 hover:underline">
+        <a href="/pedido-venta" class="flex items-center text-xs font-bold text-blue-600 hover:underline">
             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
             </svg>
             VOLVER AL LISTADO
         </a>
         <div class="flex gap-2">
-            <a href="/orden-pedido/pdf/<?= $pedido['documento'] ?>" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded text-xs font-black shadow-sm flex items-center gap-2 transition-all">
+            <a href="/pedido-venta/pdf/<?= $pedido['documento'] ?>" target="_blank" class="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded text-xs font-black shadow-sm flex items-center gap-2 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                 </svg>
                 GENERAR PDF
             </a>
 
-            <a href="/orden-pedido/edit/<?= $pedido['documento'] ?>" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded text-xs font-black shadow-sm flex items-center gap-2 transition-all">
+            <a href="/pedido-venta/edit/<?= $pedido['documento'] ?>" class="bg-amber-500 hover:bg-amber-600 text-white px-4 py-1.5 rounded text-xs font-black shadow-sm flex items-center gap-2 transition-all">
                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                 </svg>
-                EDITAR ORDEN
+                EDITAR PEDIDO
             </a>
         </div>
     </div>
@@ -115,7 +115,7 @@
                 </div>
             </div>
             <div class="text-right">
-                <span class="text-[9px] font-black uppercase text-blue-400 block mb-1">Total de la Orden</span>
+                <span class="text-[9px] font-black uppercase text-blue-400 block mb-1">Total del Pedido</span>
                 <span class="text-2xl font-black text-blue-700">
                     $ <?= number_format($pedido['valortotal'] ?? 0, 2) ?>
                 </span>
