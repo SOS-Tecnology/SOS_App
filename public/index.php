@@ -101,7 +101,7 @@ $app->post('/login', function ($request, $response) {
         'name'     => $user['name'],
         'email'    => $user['email'],
         'rol'      => $user['rol'],
-        'perfil_id'=> $user['perfil_id'] ?? null,
+        'perfil_id' => $user['perfil_id'] ?? null,
     ];
     $_SESSION['LAST_ACTIVITY'] = time();
 
@@ -124,7 +124,7 @@ $app->get('/forgot-password', function ($request, $response) {
 
 $app->post('/forgot-password', function ($request, $response) {
     $email = trim($request->getParsedBody()['email'] ?? '');
-    $user  = $GLOBALS['db']->get("users", ["id","name","email"], ["email" => $email]);
+    $user  = $GLOBALS['db']->get("users", ["id", "name", "email"], ["email" => $email]);
 
     $_SESSION['success'] = "Si el correo está registrado, recibirás un enlace en breve.";
 
@@ -144,13 +144,19 @@ $app->post('/forgot-password', function ($request, $response) {
 
         $GLOBALS['db']->delete("password_resets", ["email" => $email]);
         $GLOBALS['db']->insert("password_resets", [
-            "email" => $email, "token" => $token, "expires_at" => $expires
+            "email" => $email,
+            "token" => $token,
+            "expires_at" => $expires
         ]);
 
         $url  = (isset($_SERVER['HTTPS']) ? 'https' : 'http') . '://' . $_SERVER['HTTP_HOST'] . '/reset-password/' . $token;
         $body = "Hola {$user['name']},\n\nRestablece tu contraseña (válido 1 hora):\n\n{$url}\n\nSOS-Nómina";
-        @mail($email, "Restablecer contraseña - SOS Nómina", $body,
-              "From: noreply@sos-nomina.local\r\nContent-Type: text/plain; charset=UTF-8");
+        @mail(
+            $email,
+            "Restablecer contraseña - SOS Nómina",
+            $body,
+            "From: noreply@sos-nomina.local\r\nContent-Type: text/plain; charset=UTF-8"
+        );
     }
 
     return $response->withHeader('Location', '/forgot-password')->withStatus(302);
@@ -158,8 +164,11 @@ $app->post('/forgot-password', function ($request, $response) {
 
 $app->get('/reset-password/{token}', function ($request, $response, $args) {
     $token = $args['token'];
-    $reset = $GLOBALS['db']->get("password_resets", "*",
-        ["token" => $token, "expires_at[>]" => date('Y-m-d H:i:s')]);
+    $reset = $GLOBALS['db']->get(
+        "password_resets",
+        "*",
+        ["token" => $token, "expires_at[>]" => date('Y-m-d H:i:s')]
+    );
 
     if (!$reset) {
         $_SESSION['errors'] = ["El enlace no es válido o ha expirado."];
@@ -175,8 +184,11 @@ $app->get('/reset-password/{token}', function ($request, $response, $args) {
 $app->post('/reset-password/{token}', function ($request, $response, $args) {
     $token    = $args['token'];
     $password = $request->getParsedBody()['password'] ?? '';
-    $reset    = $GLOBALS['db']->get("password_resets", "*",
-        ["token" => $token, "expires_at[>]" => date('Y-m-d H:i:s')]);
+    $reset    = $GLOBALS['db']->get(
+        "password_resets",
+        "*",
+        ["token" => $token, "expires_at[>]" => date('Y-m-d H:i:s')]
+    );
 
     if (!$reset) {
         $_SESSION['errors'] = ["El enlace no es válido o ha expirado."];
@@ -187,9 +199,11 @@ $app->post('/reset-password/{token}', function ($request, $response, $args) {
         return $response->withHeader('Location', '/reset-password/' . $token)->withStatus(302);
     }
 
-    $GLOBALS['db']->update("users",
+    $GLOBALS['db']->update(
+        "users",
         ["password" => password_hash($password, PASSWORD_DEFAULT)],
-        ["email"    => $reset['email']]);
+        ["email"    => $reset['email']]
+    );
     $GLOBALS['db']->delete("password_resets", ["token" => $token]);
 
     $_SESSION['success'] = "Contraseña actualizada. Ya puedes iniciar sesión.";
@@ -247,7 +261,16 @@ $app->group('', function ($group) {
         return $ctrl->generarPdf($request, $response, $args);
     });
 
+    $group->get('/pedido-venta/cliente-info/{codcli}', function ($req, $res, $args) {
+        return (new PedidoVentaController($GLOBALS['db']))->getClienteInfo($req, $res, $args);
+    });
 
+    $group->get('/pedido-venta/precio', function ($req, $res) {
+        return (new PedidoVentaController($GLOBALS['db']))->getPrecio($req, $res);
+    });
+    $group->get('/pedido-venta/existencia', function ($req, $res) {
+        return (new PedidoVentaController($GLOBALS['db']))->getExistencia($req, $res);
+    });
 
     // ── Sistemas (inicio) ─────────────────────────────────────────
     $group->get('/sistemas', function ($request, $response) {
@@ -395,7 +418,6 @@ $app->group('', function ($group) {
         $_SESSION['success'] = "Usuario eliminado.";
         return $response->withHeader('Location', '/usuarios')->withStatus(302);
     });
-
 })->add($authMiddleware);
 
 $app->run();
