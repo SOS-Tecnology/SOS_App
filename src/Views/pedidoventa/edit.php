@@ -15,8 +15,13 @@
 
         <!-- CABECERA -->
         <div class="bg-gray-50 border-b p-6">
-            <div class="flex justify-between items-center mb-5">
-                <span class="bg-amber-500 text-white px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase">Editando Pedido</span>
+            <div class="flex justify-between items-center mb-5 flex-wrap gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <span class="bg-amber-500 text-white px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase">Editando Pedido</span>
+                    <span id="badgeSegmento" class="hidden items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-[10px] font-black tracking-wide uppercase">
+                        Segmento: <span id="segmentoValor">—</span>
+                    </span>
+                </div>
                 <h1 class="text-2xl font-black text-gray-800">OP # <span class="text-amber-500"><?= $p['prefijo'] ?>-<?= $p['documento'] ?></span></h1>
             </div>
 
@@ -283,6 +288,17 @@ $(document).ready(function() {
     $('.select2-cliente').select2({ placeholder: 'Buscar cliente...' });
     $('#codsuc').select2({ placeholder: 'Seleccione sucursal...' });
 
+    // ── Badge de Segmento ────────────────────────────────────────
+    function mostrarSegmento(seg) {
+        seg = (seg || '').trim();
+        if (seg) {
+            $('#segmentoValor').text(seg);
+            $('#badgeSegmento').removeClass('hidden').addClass('inline-flex');
+        } else {
+            $('#badgeSegmento').addClass('hidden').removeClass('inline-flex');
+        }
+    }
+
     // Cargar sucursales del cliente actual
     const codcliInicial = '<?= $p['codcp'] ?>';
     const codsucInicial = '<?= $p['codsuc'] ?>';
@@ -296,12 +312,13 @@ $(document).ready(function() {
         $.getJSON('/pedido-venta/cliente-info/' + codcliInicial, function(d) {
             _infoClienteData = d;
             _clienteSegmento = (d.codsegmentocli || '').trim();
+            mostrarSegmento(d.codsegmentocli);
         });
     }
 
     $('#codcli').on('change', function() {
         const codcli = $(this).val();
-        if (!codcli) { _clienteSegmento = ''; return; }
+        if (!codcli) { _clienteSegmento = ''; mostrarSegmento(''); return; }
         $.getJSON('/pedido-venta/sucursales/' + codcli, function(data) {
             const opts = data.length
                 ? data.map(s => `<option value="${s.codsuc}">${s.codsuc} - ${s.nombresuc}</option>`).join('')
@@ -311,6 +328,7 @@ $(document).ready(function() {
         $.getJSON('/pedido-venta/cliente-info/' + codcli, function(d) {
             _infoClienteData = d;
             _clienteSegmento = (d.codsegmentocli || '').trim();
+            mostrarSegmento(d.codsegmentocli);
             $('#btnInfoCliente').addClass('flex').removeClass('hidden');
         });
     });

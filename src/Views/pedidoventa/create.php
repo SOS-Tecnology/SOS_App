@@ -15,9 +15,12 @@
 
         <!-- ═══════════ CABECERA ═══════════ -->
         <div class="bg-gray-50 border-b p-6">
-            <div class="flex justify-between items-start mb-5">
-                <div>
+            <div class="flex justify-between items-start mb-5 flex-wrap gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
                     <span class="bg-blue-600 text-white px-3 py-1 rounded-md text-xs font-black tracking-widest uppercase">Pedido de Venta</span>
+                    <span id="badgeSegmento" class="hidden items-center gap-1 bg-purple-100 text-purple-700 px-2 py-1 rounded-md text-[10px] font-black tracking-wide uppercase">
+                        Segmento: <span id="segmentoValor">—</span>
+                    </span>
                 </div>
                 <h1 class="text-2xl font-black text-gray-800">OP # <span class="text-gray-400">NUEVO</span></h1>
             </div>
@@ -71,37 +74,101 @@
             </div>
 
             <!-- Fila 3: Observaciones + botón Info Cliente -->
-            <div>
-                <div class="flex items-center gap-2 mb-1">
-                    <label class="text-[10px] font-black text-gray-500 uppercase">Observaciones Generales</label>
-                    <button type="button" id="btnInfoCliente"
-                        class="hidden items-center gap-1 bg-teal-600 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-teal-700 transition">
-                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                        </svg>
-                        Información de Cliente
-                    </button>
+            <div class="flex gap-4 items-end">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <label class="text-[10px] font-black text-gray-500 uppercase">Observaciones Generales</label>
+                        <button type="button" id="btnInfoCliente"
+                            class="hidden items-center gap-1 bg-teal-600 text-white px-2 py-0.5 rounded text-[10px] font-bold hover:bg-teal-700 transition">
+                            <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
+                            </svg>
+                            Info. Cliente
+                        </button>
+                    </div>
+                    <input type="text" name="comen" class="w-full border border-gray-300 rounded-lg text-sm px-2 py-1.5" placeholder="Notas del documento...">
                 </div>
-                <input type="text" name="comen" class="w-full border border-gray-300 rounded-lg text-sm px-2 py-1.5" placeholder="Notas del documento...">
+                <div class="w-36 flex-shrink-0">
+                    <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">% Desc. Global</label>
+                    <div class="flex items-center border border-gray-300 rounded-lg overflow-hidden bg-white">
+                        <input type="number" name="descuento" id="descGlobal" min="0" max="100" step="0.01" value="0"
+                            class="flex-1 text-sm px-2 py-1.5 text-right focus:outline-none">
+                        <span class="px-2 text-gray-400 font-bold text-sm bg-gray-50 border-l border-gray-300">%</span>
+                    </div>
+                </div>
             </div>
         </div>
 
         <!-- ═══════════ CUERPO: TABLA ÍTEMS ═══════════ -->
         <div class="overflow-x-auto">
             <table class="w-full text-left border-collapse" id="itemsTable">
-                <thead class="bg-gray-100 border-b border-gray-200 text-[10px] font-bold text-gray-500 uppercase">
-                    <tr>
+                <thead class="bg-gray-100 border-b border-gray-200">
+                    <tr class="text-[9px] font-light text-gray-400 uppercase tracking-wider">
                         <th class="px-3 py-2">Producto / Color / Talla</th>
-                        <th class="px-3 py-2 w-24 text-right">Subtotal</th>
+                        <th class="px-3 py-2 w-28 text-right">Subtotal Línea</th>
                         <th class="px-3 py-2 w-8"></th>
                     </tr>
                 </thead>
                 <tbody id="itemsTbody"></tbody>
             </table>
-            <div class="p-4 bg-gray-50 border-t flex justify-end gap-8 text-sm font-bold">
-                <span>Total Ítems: <span id="totalItems">0</span></span>
-                <span>Total Cantidades: <span id="totalQty">0</span></span>
-                <span>Gran Total: <span id="grandTotal">$ 0.00</span></span>
+        </div>
+
+        <!-- ═══════════ RESUMEN ═══════════ -->
+        <div class="border-t">
+            <div class="flex justify-end p-4">
+                <div class="w-full max-w-sm">
+                    <table class="w-full text-sm">
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Subtotal bruto</td>
+                                <td class="py-1.5 text-right font-mono text-gray-700" id="resSubtotal">$ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Desc. global (<span id="resDescPct">0</span>%)</td>
+                                <td class="py-1.5 text-right font-mono text-red-500" id="resDescGlobal">- $ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Desc. en ítems</td>
+                                <td class="py-1.5 text-right font-mono text-red-500" id="resDescItems">- $ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-1.5 text-gray-600 font-semibold">Base gravable</td>
+                                <td class="py-1.5 text-right font-mono font-semibold text-gray-700" id="resBase">$ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">IVA</td>
+                                <td class="py-1.5 text-right font-mono text-blue-600" id="resIva">$ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">
+                                    Ret. Fuente
+                                    <input type="number" name="retencion_pct" id="reteFuentePct" min="0" max="100" step="0.01"
+                                        value="0"
+                                        class="ml-1 w-14 border border-gray-200 rounded px-1 py-0.5 text-xs text-right bg-yellow-50">%
+                                </td>
+                                <td class="py-1.5 text-right font-mono text-orange-500" id="resRetefuente">- $ 0.00</td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">
+                                    Rete ICA
+                                    <input type="number" name="reteica_pct" id="reteIcaPct" min="0" max="100" step="0.01"
+                                        value="0"
+                                        class="ml-1 w-14 border border-gray-200 rounded px-1 py-0.5 text-xs text-right bg-yellow-50">%
+                                </td>
+                                <td class="py-1.5 text-right font-mono text-orange-500" id="resReteica">- $ 0.00</td>
+                            </tr>
+                            <tr class="bg-blue-50">
+                                <td class="py-2.5 pl-2 text-blue-800 font-black text-base">GRAN TOTAL</td>
+                                <td class="py-2.5 pr-2 text-right font-black text-blue-800 text-base font-mono" id="resGranTotal">$ 0.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <input type="hidden" name="vriva"      id="hIva">
+                    <input type="hidden" name="retencion"  id="hRetefuente">
+                    <input type="hidden" name="reteica"    id="hReteica">
+                    <input type="hidden" name="valortotal" id="hGranTotal">
+                    <input type="hidden" name="descuento2" id="hDescItems">
+                </div>
             </div>
         </div>
 
@@ -213,13 +280,15 @@
 
 <!-- JSON para JS -->
 <script>
-const PRODUCTOS      = <?= json_encode(array_map(fn($p) => ['codr'=>$p['codr'],'descr'=>$p['descr']], $productos)) ?>;
+const PRODUCTOS      = <?= json_encode(array_map(fn($p) => ['codr'=>$p['codr'],'descr'=>$p['descr'],'piva'=>(float)($p['piva']??0)], $productos)) ?>;
 const TABLAS_PRECIO  = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tablasPrecios)) ?>;
 const TABPRELIMIT_DATA = <?= json_encode(array_map(fn($r) => ['codigotp'=>trim($r['codigotp']),'codigoseg'=>trim($r['codigoseg'])], $tablasControladas ?? [])) ?>;
 const COLORES        = <?= json_encode(array_map(fn($c) => ['codigo'=>$c['codigo'],'nombre'=>$c['nombre']], $colores)) ?>;
 const TALLAS         = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tallas)) ?>;
 const COMEN_X_ITEM   = <?= (int)($tmConfig['comenxitem'] ?? 0) ?>;
 const BODEGA_DEFAULT = '01';
+const PIVA_MAP = {};
+PRODUCTOS.forEach(p => PIVA_MAP[p.codr] = p.piva);
 
 // ── Control tabprelimit ──────────────────────────────────────────────
 const TABLAS_CTRL = new Set(TABPRELIMIT_DATA.map(r => r.codigotp));
@@ -238,10 +307,21 @@ $(document).ready(function() {
     $('.select2-cliente').select2({ placeholder: 'Buscar cliente...' });
     $('#codsuc').select2({ placeholder: 'Seleccione cliente...' });
 
+    // ── Badge de Segmento ────────────────────────────────────────
+    function mostrarSegmento(seg) {
+        seg = (seg || '').trim();
+        if (seg) {
+            $('#segmentoValor').text(seg);
+            $('#badgeSegmento').removeClass('hidden').addClass('inline-flex');
+        } else {
+            $('#badgeSegmento').addClass('hidden').removeClass('inline-flex');
+        }
+    }
+
     // ── Sucursales + info cliente AJAX ───────────────────────────
     $('#codcli').on('change', function() {
         const codcli = $(this).val();
-        if (!codcli) return;
+        if (!codcli) { _clienteSegmento = ''; mostrarSegmento(''); return; }
         $.getJSON('/pedido-venta/sucursales/' + codcli, function(data) {
             const opts = data.length
                 ? data.map(s => `<option value="${s.codsuc}">${s.codsuc} - ${s.nombresuc}</option>`).join('')
@@ -257,6 +337,7 @@ $(document).ready(function() {
             $('#btnInfoCliente').addClass('flex').removeClass('hidden');
             _infoClienteData = d;
             _clienteSegmento = (d.codsegmentocli || '').trim();
+            mostrarSegmento(d.codsegmentocli);
         });
     });
 
@@ -306,10 +387,11 @@ $(document).ready(function() {
     // ── addRow ───────────────────────────────────────────────────
     let rowIdx = 0;
 
-    function addRow(codr, tabpre, codcolor, codtalla, cantidad, precio) {
+    function addRow(codr, tabpre, codcolor, codtalla, cantidad, precio, descto) {
         codr     = codr     || '';  tabpre   = tabpre   || '';
         codcolor = codcolor || '';  codtalla = codtalla || '';
         cantidad = cantidad || 1;   precio   = precio   || 0;
+        descto   = descto   || 0;
 
         const comentFila = COMEN_X_ITEM
             ? `<tr class="comment-row border-b border-gray-200" data-index="${rowIdx}">
@@ -319,56 +401,67 @@ $(document).ready(function() {
                 </td></tr>`
             : `<tr class="comment-row" data-index="${rowIdx}" style="display:none"><td colspan="3"><input type="hidden" name="items[${rowIdx}][comencpo]" value=""></td></tr>`;
 
+        const bruto = cantidad * precio;
+        const neto  = bruto * (1 - descto/100);
+
         // Línea 1: producto (descripción) | color | talla
-        // Línea 2: tabla precio | existencia | cantidad | precio | subtotal | [botón eliminar rowspan=2]
+        // Línea 2: tabla precio | existencia | cantidad | precio | desc% | subtotal | [botón eliminar rowspan=2]
         $('#itemsTbody').append(`
-        <tr class="item-row-a bg-white border-t border-gray-200" data-index="${rowIdx}">
-            <td class="px-3 pt-2 pb-0" colspan="2">
-                <div class="flex gap-2 items-end">
+        <tr class="item-row-a bg-blue-50/40 border-t border-gray-200" data-index="${rowIdx}">
+            <td class="px-3 pt-2 pb-1" colspan="2">
+                <div class="flex gap-3 items-end">
                     <div class="flex-1 min-w-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Producto</label>
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Producto</label>
                         <select name="items[${rowIdx}][codr]" class="product-select w-full" required>${buildProdOpts(codr)}</select>
                     </div>
                     <div class="w-24 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Color</label>
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Color</label>
                         <select name="items[${rowIdx}][codcolor]" class="color-select w-full">${buildColorOpts(codcolor)}</select>
                     </div>
                     <div class="w-24 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Talla</label>
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Talla</label>
                         <select name="items[${rowIdx}][codtalla]" class="talla-select w-full">${buildTallaOpts(codtalla)}</select>
                     </div>
                 </div>
             </td>
-            <td class="px-2 pt-2 pb-0 text-center align-bottom" rowspan="2">
-                <button type="button" class="remove-row text-red-300 hover:text-red-500 mt-4">
+            <td class="px-2 pt-2 pb-1 text-center align-bottom" rowspan="2">
+                <button type="button" class="remove-row text-red-300 hover:text-red-500 mt-3">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
                 </button>
             </td>
         </tr>
         <tr class="item-row-b bg-white" data-index="${rowIdx}">
             <td class="px-3 pt-1 pb-2">
-                <div class="flex gap-4 items-end">
-                    <div class="w-28 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Tbl. Prec.</label>
+                <div class="flex gap-4 items-end flex-wrap">
+                    <div class="w-36 flex-shrink-0">
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Tbl. Precio</label>
                         <select name="items[${rowIdx}][tabpreitem]" class="tabpre-select w-full">${buildTablaOpts(tabpre)}</select>
                     </div>
                     <div class="w-20 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Exist.</label>
-                        <div class="exis-val border border-gray-200 rounded bg-gray-50 text-sm text-right px-2 py-1 font-mono text-gray-500">—</div>
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Exist.</label>
+                        <div class="exis-val border border-gray-200 rounded bg-gray-50 text-xs text-right px-2 py-1.5 font-mono text-gray-500">—</div>
                     </div>
-                    <div class="w-24 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Cant.</label>
+                    <div class="w-20 flex-shrink-0">
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Cant.</label>
                         <input type="number" name="items[${rowIdx}][cantidad]" class="qty w-full border border-gray-300 rounded text-sm text-center font-bold px-1 py-1" value="${cantidad}" min="1">
                     </div>
-                    <div class="w-32 flex-shrink-0">
-                        <label class="text-[9px] font-black text-gray-400 uppercase">Precio</label>
+                    <div class="w-28 flex-shrink-0">
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Precio Unit.</label>
                         <input type="number" name="items[${rowIdx}][valor]" class="price w-full border border-gray-300 rounded text-sm text-right px-1 py-1" value="${precio}" placeholder="0" step="0.01">
+                    </div>
+                    <div class="w-20 flex-shrink-0">
+                        <label class="text-[9px] font-light text-gray-400 uppercase tracking-wide">Desc. %</label>
+                        <div class="flex items-center border border-gray-300 rounded overflow-hidden">
+                            <input type="number" name="items[${rowIdx}][descto]" class="descto w-full text-sm text-right px-1 py-1 focus:outline-none" value="${descto}" min="0" max="100" step="0.01">
+                            <span class="px-1 text-gray-400 text-xs bg-gray-50 border-l border-gray-200">%</span>
+                        </div>
                     </div>
                 </div>
             </td>
             <td class="px-3 pt-1 pb-2 text-right align-bottom">
-                <span class="text-xs font-black text-gray-500 uppercase block mb-0.5">Subtotal</span>
-                <span class="font-black text-gray-700 line-total whitespace-nowrap">$ ${(cantidad * precio).toLocaleString('en-US', {minimumFractionDigits:2})}</span>
+                <span class="text-[9px] font-light text-gray-400 uppercase tracking-wide block mb-0.5">Subtotal</span>
+                <span class="font-black text-gray-700 line-total whitespace-nowrap text-sm">$ ${neto.toLocaleString('en-US',{minimumFractionDigits:2})}</span>
+                <input type="hidden" class="piva-hidden" value="${PIVA_MAP[codr]??0}">
             </td>
         </tr>
         ${comentFila}`);
@@ -402,21 +495,19 @@ $(document).ready(function() {
     // ── AJAX: precio ─────────────────────────────────────────────
     function cargarPrecio(idx, codr, tabpre) {
         $.getJSON('/pedido-venta/precio', { codr, tabpre }, function(d) {
-            if (d.precio) {
-                $(`tr.item-row-b[data-index="${idx}"] .price`).val(parseFloat(d.precio).toFixed(2)).trigger('keyup');
-            }
+            if (d.precio) { $(`tr.item-row-b[data-index="${idx}"] .price`).val(parseFloat(d.precio).toFixed(2)); recalcRow(idx); }
         });
     }
 
     // ── Cambio de producto → existencia ──────────────────────────
     $(document).on('change', '.product-select', function() {
-        const $rowA = $(this).closest('tr');
-        const idx   = $rowA.data('index');
-        const codr  = $(this).val();
+        const idx  = $(this).closest('tr').data('index');
+        const codr = $(this).val();
         if (!codr) { $(`[data-index="${idx}"] .exis-val`).text('—'); return; }
+        $(`tr.item-row-b[data-index="${idx}"] .piva-hidden`).val(PIVA_MAP[codr]??0);
         cargarExistencia(idx, codr);
         const tabpre = $(`tr.item-row-b[data-index="${idx}"] .tabpre-select`).val();
-        if (tabpre) cargarPrecio(idx, codr, tabpre);
+        if (tabpre) cargarPrecio(idx, codr, tabpre); else recalcRow(idx);
     });
 
     // ── Cambio de tabla precio → precio ──────────────────────────
@@ -426,31 +517,64 @@ $(document).ready(function() {
         const tabpre = $sel.val();
         if (!validarTablaPrecios(tabpre, $sel)) return;
         const codr   = $(`[data-index="${idx}"] .product-select`).val();
-        if (!codr || !tabpre) return;
-        cargarPrecio(idx, codr, tabpre);
+        if (codr && tabpre) cargarPrecio(idx, codr, tabpre);
     });
 
-    // ── Subtotales ───────────────────────────────────────────────
-    $(document).on('change keyup', '.qty, .price', function() {
-        const idx = $(this).closest('tr').data('index');
-        const qty   = parseFloat($(`tr.item-row-b[data-index="${idx}"] .qty`).val())   || 0;
-        const price = parseFloat($(`tr.item-row-b[data-index="${idx}"] .price`).val()) || 0;
-        $(`tr.item-row-b[data-index="${idx}"] .line-total`).text('$ ' + (qty * price).toLocaleString('en-US', {minimumFractionDigits:2}));
-        updateTotals();
+    // ── Subtotales por fila ────────────────────────────────────────
+    $(document).on('change keyup', '.qty, .price, .descto', function() {
+        recalcRow($(this).closest('tr').data('index'));
     });
+
+    function recalcRow(idx) {
+        const qty    = parseFloat($(`tr.item-row-b[data-index="${idx}"] .qty`).val())    || 0;
+        const price  = parseFloat($(`tr.item-row-b[data-index="${idx}"] .price`).val())  || 0;
+        const descto = parseFloat($(`tr.item-row-b[data-index="${idx}"] .descto`).val()) || 0;
+        $(`tr.item-row-b[data-index="${idx}"] .line-total`).text('$ ' + (qty*price*(1-descto/100)).toLocaleString('en-US',{minimumFractionDigits:2}));
+        updateTotals();
+    }
+
+    function fmt(n) { return '$ ' + n.toLocaleString('en-US',{minimumFractionDigits:2}); }
 
     function updateTotals() {
-        let total = 0, qty = 0, items = 0;
+        let subtotalBruto=0, descItems=0, ivaTotal=0;
         $('tr.item-row-a').each(function() {
-            const idx = $(this).data('index');
-            qty   += parseFloat($(`tr.item-row-b[data-index="${idx}"] .qty`).val())  || 0;
-            total += parseFloat($(`tr.item-row-b[data-index="${idx}"] .line-total`).text().replace(/[$,]/g,'')) || 0;
-            items++;
+            const idx    = $(this).data('index');
+            const qty    = parseFloat($(`tr.item-row-b[data-index="${idx}"] .qty`).val())    || 0;
+            const price  = parseFloat($(`tr.item-row-b[data-index="${idx}"] .price`).val())  || 0;
+            const descto = parseFloat($(`tr.item-row-b[data-index="${idx}"] .descto`).val()) || 0;
+            const piva   = parseFloat($(`tr.item-row-b[data-index="${idx}"] .piva-hidden`).val()) || 0;
+            const bruto  = qty * price;
+            const dItem  = bruto * (descto/100);
+            subtotalBruto += bruto;
+            descItems     += dItem;
+            ivaTotal      += (bruto - dItem) * (piva/100);
         });
-        $('#grandTotal').text('$ ' + total.toLocaleString('en-US', {minimumFractionDigits:2}));
-        $('#totalQty').text(qty);
-        $('#totalItems').text(items);
+        const descGlobalPct = parseFloat($('#descGlobal').val()) || 0;
+        const descGlobal    = (subtotalBruto - descItems) * (descGlobalPct/100);
+        const baseGravable  = subtotalBruto - descItems - descGlobal;
+        const reteFuentePct = parseFloat($('#reteFuentePct').val()) || 0;
+        const reteIcaPct    = parseFloat($('#reteIcaPct').val())    || 0;
+        const retefuente    = baseGravable * (reteFuentePct/100);
+        const reteica       = baseGravable * (reteIcaPct/100);
+        const granTotal     = baseGravable + ivaTotal - retefuente - reteica;
+
+        $('#resSubtotal').text(fmt(subtotalBruto));
+        $('#resDescPct').text(descGlobalPct);
+        $('#resDescGlobal').text('- '+fmt(descGlobal));
+        $('#resDescItems').text('- '+fmt(descItems));
+        $('#resBase').text(fmt(baseGravable));
+        $('#resIva').text(fmt(ivaTotal));
+        $('#resRetefuente').text('- '+fmt(retefuente));
+        $('#resReteica').text('- '+fmt(reteica));
+        $('#resGranTotal').text(fmt(granTotal));
+        $('#hIva').val(ivaTotal.toFixed(2));
+        $('#hRetefuente').val(retefuente.toFixed(2));
+        $('#hReteica').val(reteica.toFixed(2));
+        $('#hGranTotal').val(granTotal.toFixed(2));
+        $('#hDescItems').val(descItems.toFixed(2));
     }
+
+    $('#descGlobal, #reteFuentePct, #reteIcaPct').on('input keyup', updateTotals);
 
     // ── Eliminar fila ────────────────────────────────────────────
     $(document).on('click', '.remove-row', function() {
