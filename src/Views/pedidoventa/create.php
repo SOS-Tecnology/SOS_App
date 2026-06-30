@@ -35,6 +35,10 @@
                         <option value="<?= htmlspecialchars($c['codcli']) ?>"><?= htmlspecialchars($c['nombrecli']) ?></option>
                         <?php endforeach; ?>
                     </select>
+                    <div id="clienteInfo" class="mt-1 text-[10px] text-gray-500 hidden" style="display: none;">
+                        <span id="clienteDireccion"></span> - <span id="clienteCiudad"></span>
+                        <span class="text-purple-600 ml-2">Segmento: <span id="clienteSegmento"></span></span>
+                    </div>
                 </div>
                 <div>
                     <label class="block text-[10px] font-black text-gray-500 uppercase mb-1">Sucursal</label>
@@ -319,9 +323,29 @@ $(document).ready(function() {
     }
 
     // ── Sucursales + info cliente AJAX ───────────────────────────
-    $('#codcli').on('change', function() {
+    let clienteOriginal = '';
+
+    $('#codcli').on('select2:select', function(e) {
         const codcli = $(this).val();
-        if (!codcli) { _clienteSegmento = ''; mostrarSegmento(''); return; }
+        const currentItems = $('tr.item-row-a').length;
+
+        // Verificar si hay ítems antes de permitir cambio de cliente
+        if (clienteOriginal && currentItems > 0 && codcli !== clienteOriginal) {
+            alert('⚠️ CONTROL MUI IMPORTANTE\n\nNo se permite cambiar el cliente cuando hay ítems agregados.\n\nDebe eliminar todos los ítems antes de cambiar el cliente.');
+            $(this).val(clienteOriginal).trigger('change.select2');
+            return;
+        }
+
+        clienteOriginal = codcli;
+        console.log('Cliente seleccionado:', codcli);
+
+        if (!codcli) {
+            _clienteSegmento = '';
+            mostrarSegmento('');
+            $("#clienteInfo').hide();
+            return;
+        }
+
         $.getJSON('/pedido-venta/sucursales/' + codcli, function(data) {
             const opts = data.length
                 ? data.map(s => `<option value="${s.codsuc}">${s.codsuc} - ${s.nombresuc}</option>`).join('')
@@ -329,6 +353,7 @@ $(document).ready(function() {
             $('#codsuc').html(opts).trigger('change.select2');
         });
         $.getJSON('/pedido-venta/cliente-info/' + codcli, function(d) {
+            console.log('Datos cliente recibidos:', d);
             $('#plazoCli').text(d.plazocli ?? '—');
             if (d.plazocli > 0) {
                 $('#formapago').val('credito').trigger('change');
@@ -338,6 +363,16 @@ $(document).ready(function() {
             _infoClienteData = d;
             _clienteSegmento = (d.codsegmentocli || '').trim();
             mostrarSegmento(d.codsegmentocli);
+
+            // Mostrar información del cliente en el encabezado
+            $('#clienteDireccion').text(d.direccioncli || 'Sin dirección');
+            $('#clienteCiudad').text(d.nombreciu || 'Sin ciudad');
+            $('#clienteSegmento').text(d.codsegmentocli || '—');
+            $('#clienteInfo').show();
+            console.log('Mostrando info cliente - div visible');
+        }).fail(function() {
+            console.error('Error al obtener info del cliente');
+            $('#clienteInfo').hide();
         });
     });
 

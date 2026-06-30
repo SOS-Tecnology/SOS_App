@@ -32,10 +32,10 @@ $total_registros = count($pedidos);
     <!-- ── Panel de Filtros ───────────────────────────────────────── -->
     <form method="GET" action="/pedido-venta" id="formFiltros">
 
-        <!-- Pestañas de estado y límite -->
-        <div class="flex flex-col gap-2 mb-3">
+        <!-- Línea 1: Estado y límite -->
+        <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-t-lg border border-b-0 shadow-sm">
             <!-- Tabs estado -->
-            <div class="flex gap-1 bg-white p-1 rounded-lg border shadow-sm flex-wrap">
+            <div class="flex gap-1">
                 <?php
                 $tabs = [
                     'PENDIENTE' => ['label' => 'Pendientes',  'active' => 'bg-blue-600 text-white',  'inactive' => 'text-gray-500 hover:bg-gray-100'],
@@ -47,15 +47,17 @@ $total_registros = count($pedidos);
                     $cls = ($filtroActual == $val) ? $tab['active'] : $tab['inactive'];
                 ?>
                     <button type="submit" name="estado" value="<?= $val ?>"
-                        class="px-3 py-1.5 text-xs font-bold rounded-md transition <?= $cls ?>">
+                        class="px-3 py-1.5 text-xs font-bold rounded transition <?= $cls ?>">
                         <?= $tab['label'] ?>
                     </button>
                 <?php endforeach; ?>
             </div>
 
+            <div class="w-px h-6 bg-gray-200"></div>
+
             <!-- Límite registros -->
-            <div class="flex items-center gap-2 bg-white border rounded-lg px-3 py-1.5 shadow-sm self-start">
-                <span class="text-xs text-gray-400 whitespace-nowrap">Mostrar</span>
+            <div class="flex items-center gap-2">
+                <span class="text-xs text-gray-400">Mostrar</span>
                 <?php foreach ([200 => '200', 500 => '500', 1000 => '1000', 0 => 'Todos'] as $val => $label): ?>
                     <button type="submit" name="limite" value="<?= $val ?>"
                         class="px-2 py-1 text-xs font-bold rounded transition <?= $limiteActual == $val ? 'bg-blue-600 text-white' : 'text-gray-500 hover:bg-gray-100' ?>">
@@ -65,12 +67,12 @@ $total_registros = count($pedidos);
             </div>
         </div>
 
-        <!-- Filtros de cliente y fecha -->
-        <div class="flex flex-col gap-2">
-            <div>
-                <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Cliente</label>
+        <!-- Línea 2: Cliente, fechas y botones -->
+        <div class="flex flex-wrap items-center gap-2 bg-white p-2 rounded-b-lg border shadow-sm">
+            <!-- Cliente -->
+            <div class="flex-1 min-w-[200px] max-w-[300px]">
                 <select name="codcli" id="selectCliente"
-                    class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
+                    class="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-700 bg-white focus:outline-none focus:ring-2 focus:ring-blue-400">
                     <option value="">— Todos los clientes —</option>
                     <?php foreach ($clientes as $c): ?>
                         <option value="<?= htmlspecialchars($c['codcli']) ?>"
@@ -81,27 +83,30 @@ $total_registros = count($pedidos);
                 </select>
             </div>
 
-            <div class="flex flex-wrap gap-2 items-end">
-                <div class="flex-1 min-w-[130px]">
+            <!-- Fechas -->
+            <div class="flex items-center gap-2">
+                <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Desde</label>
                     <input type="date" name="fecha_desde" value="<?= htmlspecialchars($fechaDesde) ?>"
-                        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        class="border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 w-32">
                 </div>
-                <div class="flex-1 min-w-[130px]">
+                <div>
                     <label class="block text-[10px] font-bold text-gray-400 uppercase mb-1">Hasta</label>
                     <input type="date" name="fecha_hasta" value="<?= htmlspecialchars($fechaHasta) ?>"
-                        class="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400">
+                        class="border border-gray-200 rounded-lg px-2 py-1.5 text-sm text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400 w-32">
                 </div>
-                <div class="flex gap-2 flex-shrink-0">
-                    <button type="submit" onclick="return validateDates();"
-                        class="bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm whitespace-nowrap">
-                        Filtrar
-                    </button>
-                    <a href="/pedido-venta"
-                        class="bg-gray-100 text-gray-600 px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-gray-200 transition whitespace-nowrap">
-                        Limpiar
-                    </a>
-                </div>
+            </div>
+
+            <!-- Botones -->
+            <div class="flex gap-2">
+                <button type="submit" onclick="return validateDates();"
+                    class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-bold hover:bg-blue-700 transition shadow-sm">
+                    Filtrar
+                </button>
+                <a href="/pedido-venta"
+                    class="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg text-sm font-bold hover:bg-gray-200 transition">
+                    Limpiar
+                </a>
             </div>
         </div>
 

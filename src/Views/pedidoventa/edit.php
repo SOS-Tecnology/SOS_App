@@ -316,8 +316,21 @@ $(document).ready(function() {
         });
     }
 
-    $('#codcli').on('change', function() {
+    let clienteOriginal = '<?= $p['codcp'] ?? '' ?>';
+
+    $('#codcli').on('select2:select', function(e) {
         const codcli = $(this).val();
+        const currentItems = $('tr.item-row-a').length;
+
+        // Verificar si hay ítems antes de permitir cambio de cliente
+        if (clienteOriginal && currentItems > 0 && codcli !== clienteOriginal) {
+            alert('⚠️ CONTROL MUI IMPORTANTE\n\nNo se permite cambiar el cliente cuando hay ítems agregados.\n\nDebe eliminar todos los ítems antes de cambiar el cliente.');
+            $(this).val(clienteOriginal).trigger('change.select2');
+            return;
+        }
+
+        clienteOriginal = codcli;
+
         if (!codcli) { _clienteSegmento = ''; mostrarSegmento(''); return; }
         $.getJSON('/pedido-venta/sucursales/' + codcli, function(data) {
             const opts = data.length

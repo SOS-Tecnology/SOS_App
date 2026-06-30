@@ -190,6 +190,7 @@ class PedidoVentaController
         $id     = $args['id'];
         $pedido = $this->db->get('cabezamov', [
             '[>]geclientes' => ['codcp' => 'codcli'],
+            '[>]geciudades' => ['geclientes.codciudadcli' => 'codigociu'],
         ], [
             'cabezamov.documento',  'cabezamov.prefijo',
             'cabezamov.codcp',      'cabezamov.codsuc',
@@ -197,9 +198,13 @@ class PedidoVentaController
             'cabezamov.comen',      'cabezamov.estado',
             'cabezamov.valortotal', 'cabezamov.plazo',
             'cabezamov.otrodoc',    'cabezamov.vendedor',
-            'cabezamov.descuento',  'cabezamov.vriva',
-            'cabezamov.retencion',  'cabezamov.reteica',
+            'cabezamov.descuento',  'cabezamov.descuento2',
+            'cabezamov.vriva',      'cabezamov.retencion',
+            'cabezamov.reteica',
             'geclientes.nombrecli(cliente)',
+            'geclientes.direccioncli',
+            'geclientes.codsegmentocli',
+            'geciudades.nombreciu',
         ], ['cabezamov.documento' => $id, 'cabezamov.tm' => 'PV']);
 
         $detalles = $this->db->select('cuerpomov', [

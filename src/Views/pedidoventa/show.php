@@ -36,6 +36,8 @@
                 <div class="md:col-span-2">
                     <span class="block text-[9px] font-bold text-gray-400 uppercase">Cliente</span>
                     <div class="text-sm font-bold truncate"><?= $pedido['codcp'] ?> - <?= $pedido['cliente'] ?></div>
+                    <div class="text-[10px] text-gray-300"><?= $pedido['direccioncli'] ?? '' ?> - <?= $pedido['nombreciu'] ?? '' ?></div>
+                    <div class="text-[10px] text-purple-300">Segmento: <?= $pedido['codsegmentocli'] ?? '—' ?></div>
                 </div>
                 <div>
                     <span class="block text-[9px] font-bold text-gray-400 uppercase">Sucursal</span>
@@ -68,17 +70,33 @@
                         <th class="px-3 py-2">Referencia / Producto</th>
                         <th class="px-2 py-2 text-center">Talla</th>
                         <th class="px-2 py-2 text-center">Color</th>
+                        <th class="px-2 py-2 text-center">Tabla Precio</th>
                         <th class="px-2 py-2 text-center">Cant.</th>
                         <th class="px-2 py-2 text-right">Precio Un.</th>
+                        <th class="px-2 py-2 text-center">Desc. %</th>
                         <th class="px-3 py-2 text-right">Subtotal</th>
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-100">
                     <?php
                     $totalQty = 0;
+                    $subtotalBruto = 0;
                     foreach ($detalles as $d):
                         $subtotal = $d['cantidad'] * $d['valor'];
                         $totalQty += $d['cantidad'];
+                        $subtotalBruto += $subtotal;
+                    endforeach;
+
+                    $descuentoPct = $pedido['descuento'] ?? 0;
+                    $descuentoItems = $pedido['descuento2'] ?? 0;
+                    $descGlobal = ($subtotalBruto - $descuentoItems) * ($descuentoPct / 100);
+                    $baseGravable = $subtotalBruto - $descuentoItems - $descGlobal;
+                    $reteFuente = $baseGravable * (($pedido['retencion'] ?? 0) / 100);
+                    $reteIca = $baseGravable * (($pedido['reteica'] ?? 0) / 100);
+                    ?>
+
+                    <?php foreach ($detalles as $d):
+                        $subtotal = $d['cantidad'] * $d['valor'];
                     ?>
                         <tr class="hover:bg-gray-50 transition">
                             <td class="p-2 px-3">
@@ -87,13 +105,15 @@
                             </td>
                             <td class="p-2 text-center text-xs font-bold"><?= $d['codtalla'] ?></td>
                             <td class="p-2 text-center text-xs"><?= $d['codcolor'] ?></td>
+                            <td class="p-2 text-center text-xs font-bold text-gray-600"><?= $d['tabpreitem'] ?? '' ?></td>
                             <td class="p-2 text-center text-xs font-black text-blue-600"><?= number_format($d['cantidad'], 0) ?></td>
                             <td class="p-2 text-right text-xs">$ <?= number_format($d['valor'], 2) ?></td>
+                            <td class="p-2 text-center text-xs font-bold text-red-500"><?= number_format($d['descto'] ?? 0, 2) ?>%</td>
                             <td class="p-2 px-3 text-right text-xs font-bold text-gray-700">$ <?= number_format($subtotal, 2) ?></td>
                         </tr>
                         <?php if (!empty($d['comencpo'])): ?>
                             <tr class="bg-gray-50/30">
-                                <td colspan="6" class="px-3 py-1 text-[9px] text-blue-500 italic border-b border-gray-100">
+                                <td colspan="8" class="px-3 py-1 text-[9px] text-blue-500 italic border-b border-gray-100">
                                     Nota ítem: <?= $d['comencpo'] ?>
                                 </td>
                             </tr>
@@ -101,6 +121,49 @@
                     <?php endforeach; ?>
                 </tbody>
             </table>
+        </div>
+
+        <div class="border-t">
+            <div class="flex justify-end p-4">
+                <div class="w-full max-w-sm">
+                    <table class="w-full text-sm">
+                        <tbody>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Subtotal bruto</td>
+                                <td class="py-1.5 text-right font-mono text-gray-700">$ <?= number_format($subtotalBruto ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Desc. global (<?= number_format($pedido['descuento'] ?? 0, 2) ?>%)</td>
+                                <td class="py-1.5 text-right font-mono text-red-500">- $ <?= number_format($descGlobal ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Desc. en ítems</td>
+                                <td class="py-1.5 text-right font-mono text-red-500">- $ <?= number_format($pedido['descuento2'] ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-200">
+                                <td class="py-1.5 text-gray-600 font-semibold">Base gravable</td>
+                                <td class="py-1.5 text-right font-mono font-semibold text-gray-700">$ <?= number_format($baseGravable ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">IVA</td>
+                                <td class="py-1.5 text-right font-mono text-blue-600">$ <?= number_format($pedido['vriva'] ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Ret. Fuente <?= number_format($pedido['retencion'] ?? 0, 2) ?>%</td>
+                                <td class="py-1.5 text-right font-mono text-orange-500">- $ <?= number_format($reteFuente ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="border-b border-gray-100">
+                                <td class="py-1.5 text-gray-500 font-medium">Rete ICA <?= number_format($pedido['reteica'] ?? 0, 2) ?>%</td>
+                                <td class="py-1.5 text-right font-mono text-orange-500">- $ <?= number_format($reteIca ?? 0, 2) ?></td>
+                            </tr>
+                            <tr class="bg-blue-50">
+                                <td class="py-2.5 pl-2 text-blue-800 font-black text-base">GRAN TOTAL</td>
+                                <td class="py-2.5 pr-2 text-right font-black text-blue-800 text-base font-mono">$ <?= number_format($pedido['valortotal'] ?? 0, 2) ?></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
 
         <div class="bg-blue-50 border-t border-blue-100 px-6 py-3 flex justify-between items-center text-blue-900">
@@ -113,12 +176,6 @@
                     <span class="text-[9px] font-black uppercase text-blue-400">Total Unidades</span>
                     <span class="text-sm font-black"><?= number_format($totalQty, 0) ?></span>
                 </div>
-            </div>
-            <div class="text-right">
-                <span class="text-[9px] font-black uppercase text-blue-400 block mb-1">Total del Pedido</span>
-                <span class="text-2xl font-black text-blue-700">
-                    $ <?= number_format($pedido['valortotal'] ?? 0, 2) ?>
-                </span>
             </div>
         </div>
     </div>
