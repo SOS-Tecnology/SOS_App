@@ -215,10 +215,20 @@
 <script>
 const PRODUCTOS      = <?= json_encode(array_map(fn($p) => ['codr'=>$p['codr'],'descr'=>$p['descr']], $productos)) ?>;
 const TABLAS_PRECIO  = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tablasPrecios)) ?>;
+const TABPRELIMIT_DATA = <?= json_encode(array_map(fn($r) => ['codigotp'=>trim($r['codigotp']),'codigoseg'=>trim($r['codigoseg'])], $tablasControladas ?? [])) ?>;
 const COLORES        = <?= json_encode(array_map(fn($c) => ['codigo'=>$c['codigo'],'nombre'=>$c['nombre']], $colores)) ?>;
 const TALLAS         = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tallas)) ?>;
 const COMEN_X_ITEM   = <?= (int)($tmConfig['comenxitem'] ?? 0) ?>;
 const BODEGA_DEFAULT = '01';
+
+// ── Control tabprelimit ──────────────────────────────────────────────
+const TABLAS_CTRL = new Set(TABPRELIMIT_DATA.map(r => r.codigotp));
+const TABLA_SEGS  = {};
+TABPRELIMIT_DATA.forEach(r => {
+    if (!TABLA_SEGS[r.codigotp]) TABLA_SEGS[r.codigotp] = [];
+    TABLA_SEGS[r.codigotp].push(r.codigoseg);
+});
+let _clienteSegmento = '';
 </script>
 
 <script>
@@ -246,6 +256,7 @@ $(document).ready(function() {
             }
             $('#btnInfoCliente').addClass('flex').removeClass('hidden');
             _infoClienteData = d;
+            _clienteSegmento = (d.codsegmentocli || '').trim();
         });
     });
 
@@ -410,9 +421,11 @@ $(document).ready(function() {
 
     // ── Cambio de tabla precio → precio ──────────────────────────
     $(document).on('change', '.tabpre-select', function() {
-        const idx    = $(this).closest('tr').data('index');
+        const $sel   = $(this);
+        const idx    = $sel.closest('tr').data('index');
+        const tabpre = $sel.val();
+        if (!validarTablaPrecios(tabpre, $sel)) return;
         const codr   = $(`[data-index="${idx}"] .product-select`).val();
-        const tabpre = $(this).val();
         if (!codr || !tabpre) return;
         cargarPrecio(idx, codr, tabpre);
     });
@@ -445,6 +458,21 @@ $(document).ready(function() {
         $(`tr[data-index="${idx}"]`).remove();
         updateTotals();
     });
+
+    // ── Validación tabla de precios por segmento ──────────────────
+    function validarTablaPrecios(tabpre, $select) {
+        if (!tabpre) return true;
+        if (!TABLAS_CTRL.has(tabpre)) return true; // No controlada: libre
+        const seg = _clienteSegmento;
+        const allowed = TABLA_SEGS[tabpre] || [];
+        if (seg && allowed.includes(seg)) return true;
+        const msg = !seg
+            ? `La tabla de precios "${tabpre}" está controlada por segmento.\nEl cliente seleccionado no tiene segmento asignado.\nSeleccione otro cliente o cambie la tabla de precios.`
+            : `La tabla de precios "${tabpre}" no está habilitada para el segmento de cliente "${seg}".\nSeleccione una tabla de precios permitida para este cliente.`;
+        alert(msg);
+        if ($select) $select.val('').trigger('change');
+        return false;
+    }
 
     // ── Botón 1: agregar fila directa ────────────────────────────
     $('#btnAddRow').on('click', function() { addRow(); });
@@ -503,6 +531,10 @@ $(document).ready(function() {
 
     $('#btnAgregarTodos').on('click', function() {
         const tabla = $('#tablaModalSelect').val();
+        if (tabla && !validarTablaPrecios(tabla, null)) {
+            alert('La tabla de precios seleccionada en el modal no está habilitada para este cliente. Elija otra tabla.');
+            return;
+        }
         let n = 0;
         $('#resultadosBusqueda .resultado-item').each(function() {
             const qty = parseInt($(this).find('.cant-modal').val()) || 0;

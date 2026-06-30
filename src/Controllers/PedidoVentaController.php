@@ -67,7 +67,8 @@ class PedidoVentaController
         return [
             'clientes'      => $this->db->select('geclientes', ['codcli', 'nombrecli'], ['ORDER' => ['nombrecli' => 'ASC']]),
             'productos'     => $this->db->select('inrefinv', ['codr', 'descr', 'siiva'], ['tipoprod' => 'V', 'ORDER' => ['codr' => 'ASC']]),
-            'tablasPrecios' => $this->db->select('tablaprecios', ['codigo', 'nombre'], ['ORDER' => ['codigo' => 'ASC']]),
+            'tablasPrecios'     => $this->db->select('tablaprecios', ['codigo', 'nombre'], ['ORDER' => ['codigo' => 'ASC']]),
+            'tablasControladas' => $this->db->select('tabprelimit', ['codigotp', 'codigoseg'], ['ORDER' => ['codigotp' => 'ASC']]),
             'colores'       => $this->db->select('tablacolor', ['codigo', 'nombre'], ['ORDER' => ['nombre' => 'ASC']]),
             'tallas'        => $this->db->select('tablatalla', ['codigo', 'nombre']),
             'tmConfig'      => $this->db->get('intimovinv', ['comenxitem', 'manejaotrodoc', 'modificavalor'], ['tm' => 'PV']) ?? ['comenxitem' => 0],
@@ -143,6 +144,7 @@ class PedidoVentaController
             'geclientes.codcli',        'geclientes.nombrecli',
             'geclientes.direccioncli',  'geclientes.plazocli',
             'geclientes.cupocli',       'geclientes.vlrcreditocli',
+            'geclientes.codsegmentocli',
             'geciudades.nombreciu',
         ], ['geclientes.codcli' => $args['codcli']]);
 
@@ -227,12 +229,13 @@ class PedidoVentaController
         $pedido = $this->db->get('cabezamov', [
             '[>]geclientes' => ['codcp' => 'codcli'],
         ], [
-            'cabezamov.documento',  'cabezamov.codcp',
-            'cabezamov.codsuc',     'cabezamov.fecha',
-            'cabezamov.fechent',    'cabezamov.comen',
-            'cabezamov.plazo',      'cabezamov.otrodoc',
-            'cabezamov.descuento',  'cabezamov.vriva',
-            'cabezamov.retencion',  'cabezamov.reteica',
+            'cabezamov.documento',  'cabezamov.prefijo',
+            'cabezamov.codcp',      'cabezamov.codsuc',
+            'cabezamov.fecha',      'cabezamov.fechent',
+            'cabezamov.comen',      'cabezamov.plazo',
+            'cabezamov.otrodoc',    'cabezamov.descuento',
+            'cabezamov.vriva',      'cabezamov.retencion',
+            'cabezamov.reteica',
             'geclientes.nombrecli(cliente)',
         ], ['cabezamov.documento' => $id, 'cabezamov.tm' => 'PV']);
 

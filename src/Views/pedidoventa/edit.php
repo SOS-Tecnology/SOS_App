@@ -257,6 +257,7 @@
 <script>
 const PRODUCTOS      = <?= json_encode(array_map(fn($p) => ['codr'=>$p['codr'],'descr'=>$p['descr'],'piva'=>(float)($p['piva']??0)], $productos)) ?>;
 const TABLAS_PRECIO  = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tablasPrecios)) ?>;
+const TABPRELIMIT_DATA = <?= json_encode(array_map(fn($r) => ['codigotp'=>trim($r['codigotp']),'codigoseg'=>trim($r['codigoseg'])], $tablasControladas ?? [])) ?>;
 const COLORES        = <?= json_encode(array_map(fn($c) => ['codigo'=>$c['codigo'],'nombre'=>$c['nombre']], $colores)) ?>;
 const TALLAS         = <?= json_encode(array_map(fn($t) => ['codigo'=>$t['codigo'],'nombre'=>$t['nombre']], $tallas)) ?>;
 const COMEN_X_ITEM   = <?= (int)($tmConfig['comenxitem'] ?? 0) ?>;
@@ -265,6 +266,15 @@ const PIVA_MAP = {};
 PRODUCTOS.forEach(p => PIVA_MAP[p.codr] = p.piva);
 // Ítems existentes para precargar
 const ITEMS_EXISTENTES = <?= json_encode($detalles) ?>;
+
+// ── Control tabprelimit ──────────────────────────────────────────────
+const TABLAS_CTRL = new Set(TABPRELIMIT_DATA.map(r => r.codigotp));
+const TABLA_SEGS  = {};
+TABPRELIMIT_DATA.forEach(r => {
+    if (!TABLA_SEGS[r.codigotp]) TABLA_SEGS[r.codigotp] = [];
+    TABLA_SEGS[r.codigotp].push(r.codigoseg);
+});
+let _clienteSegmento = '';
 </script>
 
 <script>
@@ -283,12 +293,15 @@ $(document).ready(function() {
                 : `<option value="${codsucInicial}" selected>${codsucInicial}</option>`;
             $('#codsuc').html(opts).trigger('change.select2');
         });
-        $.getJSON('/pedido-venta/cliente-info/' + codcliInicial, function(d) { _infoClienteData = d; });
+        $.getJSON('/pedido-venta/cliente-info/' + codcliInicial, function(d) {
+            _infoClienteData = d;
+            _clienteSegmento = (d.codsegmentocli || '').trim();
+        });
     }
 
     $('#codcli').on('change', function() {
         const codcli = $(this).val();
-        if (!codcli) return;
+        if (!codcli) { _clienteSegmento = ''; return; }
         $.getJSON('/pedido-venta/sucursales/' + codcli, function(data) {
             const opts = data.length
                 ? data.map(s => `<option value="${s.codsuc}">${s.codsuc} - ${s.nombresuc}</option>`).join('')
@@ -297,6 +310,7 @@ $(document).ready(function() {
         });
         $.getJSON('/pedido-venta/cliente-info/' + codcli, function(d) {
             _infoClienteData = d;
+            _clienteSegmento = (d.codsegmentocli || '').trim();
             $('#btnInfoCliente').addClass('flex').removeClass('hidden');
         });
     });
@@ -450,9 +464,11 @@ $(document).ready(function() {
     });
 
     $(document).on('change', '.tabpre-select', function() {
-        const idx = $(this).closest('tr').data('index');
+        const $sel  = $(this);
+        const idx   = $sel.closest('tr').data('index');
+        const tabpre = $sel.val();
+        if (!validarTablaPrecios(tabpre, $sel)) return;
         const codr = $(`[data-index="${idx}"] .product-select`).val();
-        const tabpre = $(this).val();
         if (codr && tabpre) cargarPrecio(idx, codr, tabpre);
     });
 
@@ -523,6 +539,22 @@ $(document).ready(function() {
                parseFloat(item.cantidad), parseFloat(item.valor), parseFloat(item.descto||0));
     });
 
+    // ── Validación tabla de precios por segmento ──────────────────
+    function validarTablaPrecios(tabpre, $select) {
+        if (!tabpre) return true;
+        if (!TABLAS_CTRL.has(tabpre)) return true; // No controlada: libre
+        const seg = _clienteSegmento;
+        const allowed = TABLA_SEGS[tabpre] || [];
+        if (seg && allowed.includes(seg)) return true;
+        // Rechazado
+        const msg = !seg
+            ? `La tabla de precios "${tabpre}" está controlada por segmento.\nEl cliente seleccionado no tiene segmento asignado.\nSeleccione otro cliente o cambie la tabla de precios.`
+            : `La tabla de precios "${tabpre}" no está habilitada para el segmento de cliente "${seg}".\nSeleccione una tabla de precios permitida para este cliente.`;
+        alert(msg);
+        if ($select) $select.val('').trigger('change');
+        return false;
+    }
+
     $('#btnAddRow').on('click', function() { addRow(); });
 
     // Modal búsqueda
@@ -556,6 +588,10 @@ $(document).ready(function() {
 
     $('#btnAgregarTodos').on('click', function() {
         const tabla = $('#tablaModalSelect').val();
+        if (tabla && !validarTablaPrecios(tabla, null)) {
+            alert('La tabla de precios seleccionada en el modal no está habilitada para este cliente. Elija otra tabla.');
+            return;
+        }
         let n = 0;
         $('#resultadosBusqueda .resultado-item').each(function() {
             const qty = parseInt($(this).find('.cant-modal').val()) || 0;
